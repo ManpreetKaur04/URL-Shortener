@@ -103,7 +103,7 @@ This project implements a URL Shortener system using Python and Flask. The syste
   ```json
   {
     "url": "<original_url>",
-    "expiry_hours": 24,  // Optional, default: 24
+    "expiry_hours": 24,  
     "password": "<optional_password>",
     "name": "<optional_name>"
   }
