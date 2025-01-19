@@ -132,7 +132,6 @@ This project implements a URL Shortener system using Python and Flask. The syste
         "timestamp": "2025-01-01T12:00:00",
         "ip_address": "192.168.1.1"
       },
-      ...
     ]
   }
   ```
