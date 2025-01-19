@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Analytics for {{ short_url }}</h2>
+    
+    {% if analytics_data %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Access Time</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in analytics_data %}
+            <tr>
+                <td>{{ entry[0] }}</td>
+                <td>{{ entry[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No analytics data found for this URL.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block content %}
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h1 class="display-4">URL Shortener</h1>
+            <p class="lead">Easily shorten your URLs with expiry, password protection, and analytics.</p>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST" action="/shorten">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">Enter URL:</label>
+                        <input type="url" class="form-control" id="url" name="url" placeholder="https://example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Enter a Name for the URL:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Name for this URL" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiry_hours" class="form-label">Expiry (hours):</label>
+                        <input type="number" class="form-control" id="expiry_hours" name="expiry_hours" value="24" min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password (optional):</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter a password">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Shorten URL</button>
+                </form>
+            </div>
+        </div>
+        {% if short_url %}
+            <div class="alert alert-success mt-4 text-center">
+                <p class="mb-2">Shortened URL:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control text-center" id="shortUrl" value="{{ short_url }}" readonly>
+                    <button class="btn btn-outline-secondary" onclick="copyToClipboard()">Copy</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordModalLabel">Enter Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modalPassword" class="form-label">Password:</label>
+                        <input type="password" class="form-control" id="modalPassword" placeholder="Enter password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitPassword()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Copy URL to clipboard
+        function copyToClipboard() {
+            const copyText = document.getElementById("shortUrl");
+            if (copyText) {
+                navigator.clipboard.writeText(copyText.value).then(() => {
+                    alert("Copied to clipboard!");
+                }).catch(err => {
+                    alert("Failed to copy: " + err);
+                });
+            } else {
+                alert("Short URL element not found.");
+            }
+        }
+
+        // Check if password is required for URL
+        async function checkPasswordProtection(shortUrl) {
+            try {
+                const response = await fetch(`/check_password/${shortUrl}`);
+                if (response.status === 200) {
+                    const data = await response.json();
+                    if (data.requires_password) {
+                        const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+                        document.getElementById('passwordModal').dataset.url = shortUrl;
+                        modal.show();
+                    } else {
+                        window.location.href = shortUrl; // Redirect directly if no password
+                    }
+                } else {
+                    alert('Error checking password.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        
+
+        // Submit password for validation
+        async function submitPassword() {
+            const modal = document.getElementById('passwordModal');
+            const shortUrl = modal.dataset.url;
+            const password = document.getElementById('modalPassword').value;
+            const submitButton = modal.querySelector('.btn-primary');
+        
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+        
+            try {
+                const response = await fetch(`/validate_password/${shortUrl}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password }),
+                });
+        
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert(data.message || 'Invalid password. Please try again.');
+                    }
+                } else {
+                    alert('Invalid password. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+            }
+        }
+        
+        
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+{% endblock %}

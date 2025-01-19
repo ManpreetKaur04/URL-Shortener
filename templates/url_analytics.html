@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="display-4 text-center mb-4">URL Analytics</h2>
+    
+    <h3>Protected URLs</h3>
+    <ul>
+        {% for url in private_urls %}
+        <li>
+            <a href="{{ url_for('analytics', short_url=url[0]) }}">{{ url[2] if url[2] else url[1] }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    
+    <h3>Non-Protected URLs</h3>
+    <ul>
+        {% for url in non_protected_urls %}
+        <li>
+            <a href="{{ url_for('analytics', short_url=url[0]) }}">{{ url[2] if url[2] else url[1] }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

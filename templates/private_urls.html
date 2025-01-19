@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Private URLs (Password Protected)</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Short URL</th>
+                    <th>Original URL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for url in private_urls %}
+                <tr>
+                    <td>{{ url[2] if url[2] else 'No name provided' }}</td>
+                    <td><a href="{{ BASE_URL + url[0] }}" target="_blank">{{ BASE_URL + url[0] }}</a></td>
+                    <td>{{ url[1] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
